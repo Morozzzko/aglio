@@ -169,7 +169,7 @@ getCss = (variables, styles, verbose, done) ->
 
     benchmark.start 'less-compile'
     less.render tmp, compress: true, (err, result) ->
-      if err then return done(errMsg 'Error processing LESS -> CSS', err)
+      if err then return done(msgErr 'Error processing LESS -> CSS', err)
 
       try
         css = result.css
@@ -317,34 +317,10 @@ modifyUriTemplate = (templateUri, parameters, colorize) ->
     uri
   , []).join('').replace(/\/+/g, '/')
 
-makeFullUriTemplate = (uriTemplate, baseUri) ->
-  # Change comma-separated params into individual params
-  while result = /\{([#&\?\+]?)([^,\}]+),/g.exec uriTemplate
-    operator = (if result[1] is '?' then '&' else result[1])
-    uriTemplate = uriTemplate.substring(0, result.index) +
-      '{' +
-      result[1] +
-      result[2] +
-      '}{' +
-      operator +
-      uriTemplate.substring(result.index + result[0].length)
-
-  # Prepend the baseUri if needed
-  if baseUri and uriTemplate.indexOf('://') is -1
-    if baseUri.charAt(baseUri.length-1) is '/'
-      baseUri = baseUri.substring 0, baseUri.length-1
-    if uriTemplate.charAt(0) isnt '/'
-      uriTemplate = '/' + uriTemplate
-    uriTemplate = baseUri + uriTemplate
-
-  return uriTemplate
-
-decorate = (api, md, slugCache, options) ->
+decorate = (api, md, slugCache, verbose) ->
   # Decorate an API Blueprint AST with various pieces of information that
   # will be useful for the theme. Anything that would significantly
   # complicate the pug template should probably live here instead!
-
-  verbose = options.verbose
 
   # Use the slug caching mechanism
   slugify = slug.bind slug, slugCache
@@ -418,36 +394,23 @@ decorate = (api, md, slugCache, options) ->
 
         action.parameters = newParams.reverse()
 
-        uriTemplate = (action.attributes or {}).uriTemplate or
-          resource.uriTemplate or ''
-
-        for parameter in action.parameters
-          regex = new RegExp(
-            "\\{\\*#{parameter.name}\\}|\\{[#&\\?\\+]?#{parameter.name}\\*\\}")
-          parameter.explode = regex.test uriTemplate
-
         # Set up the action's template URI
-        action.uriTemplate = modifyUriTemplate uriTemplate, action.parameters
+        action.uriTemplate = modifyUriTemplate(
+          (action.attributes or {}).uriTemplate or resource.uriTemplate or '',
+          action.parameters)
 
-        action.colorizedUriTemplate = modifyUriTemplate(uriTemplate,
+        action.colorizedUriTemplate = modifyUriTemplate(
+          (action.attributes or {}).uriTemplate or resource.uriTemplate or '',
           action.parameters, true)
-
-        host = options.themeFormsBaseUri
-        if host is 'auto'
-          host = api.host
-        action.fullUriTemplate = makeFullUriTemplate action.uriTemplate, host
 
         # Examples have a content section only if they have a
         # description, headers, body, or schema.
-        action.requestCount = 0
-        action.hasBody = action.method == 'PUT' or action.method == 'POST'
+        action.hasRequest = false
         for example in action.examples or []
           for name in ['requests', 'responses']
             for item in example[name] or []
-              if name is 'requests'
-                ++action.requestCount
-                if not action.hasBody and item.body
-                  action.hasBody = true
+              if name is 'requests' and not action.hasRequest
+                action.hasRequest = true
 
               # If there is no schema, but there are MSON attributes, then try
               # to generate the schema. This will fail sometimes.
@@ -512,12 +475,6 @@ exports.getConfig = ->
     description: 'Layout style name or path to custom stylesheet'},
     {name: 'emoji', description: 'Enable support for emoticons',
     boolean: true, default: true}
-    {name: 'forms',
-    description: 'Generate form fields for trying out the API',
-    boolean: true, default: false},
-    {name: 'forms-base-uri',
-    description: 'A base URI to use for trying out the API',
-    default: 'auto'}
   ]
 
 # Render the blueprint with the given options using pug and LESS
@@ -539,8 +496,6 @@ exports.render = (input, options, done) ->
   options.themeTemplate ?= 'default'
   options.themeCondenseNav ?= true
   options.themeFullWidth ?= false
-  options.themeForms ?= false
-  options.themeFormsBaseUri ?= 'auto'
 
   # Transform built-in layout names to paths
   if options.themeTemplate is 'default'
@@ -572,7 +527,7 @@ exports.render = (input, options, done) ->
   md.renderer.rules.code_block = md.renderer.rules.fence
 
   benchmark.start 'decorate'
-  decorate input, md, slugCache, options
+  decorate input, md, slugCache, options.verbose
   benchmark.end 'decorate'
 
   benchmark.start 'css-total'
@@ -586,7 +541,6 @@ exports.render = (input, options, done) ->
       condenseNav: options.themeCondenseNav
       css: css
       fullWidth: options.themeFullWidth
-      forms: options.themeForms
       date: moment
       hash: (value) ->
         crypto.createHash('md5').update(value.toString()).digest('hex')

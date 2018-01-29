@@ -63,7 +63,7 @@ mixin Nav()
                 p(style="text-align: center; word-wrap: break-word;")
                     a(href=meta.value)= meta.value
 
-mixin Parameters(action)
+mixin Parameters(params)
     //- Draw a definition list of parameter names, types, defaults,
     //- examples and descriptions.
     .title
@@ -72,125 +72,19 @@ mixin Parameters(action)
             span.close Скрыть
             span.open Показать
     .collapse-content
-        dl.inner: each param in action.parameters || []
+        dl.inner: each param in params || []
             dt= self.urldec(param.name)
             dd
-                if self.forms
-                    +ParameterField(param, action)
                 code= param.type || 'string'
                 != self.markdown(param.description)
                 if param.values.length
                     p.choices
                         strong Возможные значения:&nbsp;
                         each value in param.values
-                            code(
-                                class={'click-to-fill': self.forms}
-                                data-fill-target=self.urldec(action.elementId + '-' + param.name)
-                            )
-                                = self.urldec(value.value)
+                            code= self.urldec(value.value)
                             = ' '
 
-mixin ParameterField(param, action)
-    //- Generate an input field for the parameter to use
-    - var values = param.type === 'boolean' ? [{value: 'true'}, {value: 'false'}] : param.values
-    - values = (values && values.length) ? values : undefined
-    if values
-        select.parameter(
-            name=self.urldec(param.name)
-            id=action.elementId + '-' + param.name
-            required=param.required
-            multiple=param.explode
-        )
-            unless param.required
-                option
-            each option in values || []
-                option(
-                    value=option.value
-                    selected=option.value === param.default
-                )
-                    = option.value
-    else
-        - var type = param.type === 'number' ? 'number' : 'text'
-        - var value = param.required ? param.default || param.example || '' : ''
-        input.parameter(
-            type=type
-            name=self.urldec(param.name)
-            id=action.elementId + '-' + param.name
-            value=value
-            required=param.required
-        )
-
-mixin FormFields(action)
-    input(
-        type='hidden'
-        name='__method'
-        value=action.method
-    )
-    input(
-        type='hidden'
-        name='__uri'
-        value=action.fullUriTemplate
-    )
-    - var body
-    each example in action.examples
-        each request, index in example.requests
-            - body = body || request.body
-            each item in request.headers
-                input(
-                    type='hidden'
-                    name='__' + index + '-header_' + item.name
-                    value=item.value
-                )
-    +RequestIndexField(action)
-    if action.hasBody
-        dl.inner
-            dt Body
-            dd
-                textarea.body(
-                    name='__body'
-                    id=action.elementId + '-__body'
-                )= body
-
-mixin RequestIndexField(action)
-    if action.requestCount <= 1
-        input(
-            type='hidden'
-            name='__request'
-            value='0'
-        )
-    else
-        - var requestIndex = 0
-        dl.inner
-            dt Request
-            dd
-                select.request(name='__request')
-                    each example in action.examples
-                        each request in example.requests
-                            option(
-                                value=requestIndex
-                            )= request.name || request.description || 'Request ' + (requestIndex + 1)
-                            - requestIndex++
-
-mixin FormAction
-    button.tryit(name='__tryit', type='button') Try it out!
-        span.spinner: i.fa.fa-spinner.fa-pulse
-
-    .response.title
-        strong Server Response
-        .collapse-button.show
-            span.close Hide
-            span.open Show
-    .response.collapse-content
-        .inner
-            +FormResponseSection('Request URI', 'response-request-uri')
-            +FormResponseSection('Response Body', 'response-body')
-            +FormResponseSection('Response Headers', 'response-headers')
-
-mixin FormResponseSection(title, cls)
-        h5= title
-        pre: code(class=cls)
-
-mixin RequestResponse(title, action, request, collapse, clickToFill)
+mixin RequestResponse(title, request, collapse)
     .title
         strong
             = title
@@ -201,9 +95,9 @@ mixin RequestResponse(title, action, request, collapse, clickToFill)
             .collapse-button
                 span.close Скрыть
                 span.open Показать
-    +RequestResponseBody(action, request, collapse, clickToFill)
+    +RequestResponseBody(request, collapse)
 
-mixin RequestResponseBody(action, request, collapse, clickToFill, showBlank)
+mixin RequestResponseBody(request, collapse, showBlank)
     if request.hasContent || showBlank
         div(class=collapse ? 'collapse-content' : ''): .inner
             if request.description
@@ -219,12 +113,8 @@ mixin RequestResponseBody(action, request, collapse, clickToFill, showBlank)
                 div(style="height: 1px;")
             if request.body
                 h5 Тело сообщения
-                pre(
-                    class={'click-to-fill': self.forms && clickToFill}
-                    data-fill-target=action.elementId + '-__body'
-                )
-                    code
-                        != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
+                pre: code
+                    != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
             if request.schema
                 div
@@ -243,9 +133,9 @@ mixin RequestResponseBody(action, request, collapse, clickToFill, showBlank)
 mixin Examples(resourceGroup, resource, action)
     each example in action.examples
         each request in example.requests
-            +RequestResponse('Request', action, request, true, true)
+            +RequestResponse('Request', request, true)
         each response in example.responses
-            +RequestResponse('Response', action, response, true)
+            +RequestResponse('Response', response, true)
 
 mixin Content()
     //- Page header and API description
@@ -295,15 +185,10 @@ mixin Content()
 
                             //- A list of sub-sections for parameters, requests
                             //- and responses.
-                            form(accept-charset='UTF-8')
-                                if action.parameters.length
-                                    +Parameters(action)
-                                if self.forms
-                                    +FormFields(action)
-                                if self.forms
-                                    +FormAction
-                                if action.examples
-                                    +Examples(resourceGroup, resource, action)
+                            if action.parameters.length
+                                +Parameters(action.parameters)
+                            if action.examples
+                                +Examples(resourceGroup, resource, action)
 
 mixin ContentTriple()
     .middle
@@ -350,7 +235,7 @@ mixin ContentTriple()
                             span.hostname= self.api.host
                             != action.colorizedUriTemplate
                       .tabs
-                          if action.requestCount > 0
+                          if action.hasRequest
                               .example-names
                                   span Запрос
                                   - var requestCount = 0
@@ -361,7 +246,7 @@ mixin ContentTriple()
                               each example in action.examples
                                   each request in example.requests
                                       .tab
-                                          +RequestResponseBody(action, request, false, true, true)
+                                          +RequestResponseBody(request, false, true)
                                           .tabs
                                               .example-names
                                                   span Ответ
@@ -369,7 +254,7 @@ mixin ContentTriple()
                                                       span.tab-button= response.name
                                               each response in example.responses
                                                   .tab
-                                                      +RequestResponseBody(action, response, false, false, true)
+                                                      +RequestResponseBody(response, false, true)
                           else
                             each example in action.examples
                                 .tabs
@@ -379,7 +264,7 @@ mixin ContentTriple()
                                             span.tab-button= response.name
                                     each response in example.responses
                                         .tab
-                                            +RequestResponseBody(action, response, false, false, true)
+                                            +RequestResponseBody(response, false, true)
                 .middle
                     .action(class=action.methodLower, id=action.elementId)
                         h4.action-heading
@@ -392,11 +277,7 @@ mixin ContentTriple()
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
-                        form(accept-charset='UTF-8')
-                            if action.parameters.length
-                                +Parameters(action)
-                            if self.forms
-                                +FormFields(action)
-                                +FormAction
+                        if action.parameters.length
+                            +Parameters(action.parameters)
 
                 hr.split
