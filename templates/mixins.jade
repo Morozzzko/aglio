@@ -3,19 +3,19 @@ mixin Badge(method)
     //- Draw a badge for a given HTTP method
     case method
         when 'GET'
-            span.badge.get: i.fa.fa-arrow-down
+            span.badge.get GET
         when 'HEAD'
-            span.badge.head: i.fa.fa-info-circle
+            span.badge.head HEAD
         when 'OPTIONS'
-            span.badge.options: i.fa.fa-dot-circle-o
+            span.badge.options OPTIONS
         when 'POST'
-            span.badge.post: i.fa.fa-plus
+            span.badge.post POST
         when 'PUT'
-            span.badge.put: i.fa.fa-pencil
+            span.badge.put PUT
         when 'PATCH'
-            span.badge.patch: i.fa.fa-pencil
+            span.badge.patch PATCH
         when 'DELETE'
-            span.badge.delete: i.fa.fa-times
+            span.badge.delete DELETE
         default
             span.badge: i.fa.fa-dot-circle-o
 
