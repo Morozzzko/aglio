@@ -184,7 +184,7 @@ getCss = (variables, styles, verbose, done) ->
 
 compileTemplate = (filename, options) ->
   compiled = """
-    var pug = require('pug/runtime');
+    var pug = require('pug');
     #{pug.compileFileClient filename, options}
     module.exports = compiledFunc;
   """
