@@ -76,21 +76,6 @@ mixin Parameters(params)
             dt= self.urldec(param.name)
             dd
                 code= param.type || 'string'
-                | &nbsp;
-                if param.required
-                    span.required (обязательный)
-                else
-                    span (опциональный)
-                | &nbsp;
-                if param.default
-                    span.text-info.default
-                        strong Значение по умолчанию:&nbsp;
-                        span= param.default
-                    | &nbsp;
-                if param.example
-                    span.text-muted.example
-                        strong Пример:&nbsp;
-                        span= param.example
                 != self.markdown(param.description)
                 if param.values.length
                     p.choices
