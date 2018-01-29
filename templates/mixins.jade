@@ -133,10 +133,10 @@ mixin RequestResponseBody(request, collapse, showBlank)
                 div(style="height: 1px;")
             if request.schema
                 div
-                    h5(style='display: inline;') Schema
+                    h5(style='display: inline;') Схема
                     .collapse-button
-                        span.close Hide
-                        span.open Show
+                        span.close Скрыть
+                        span.open Показать
                 .collapse-content
                     pre: code
                         != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
