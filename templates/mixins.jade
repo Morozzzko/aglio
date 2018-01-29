@@ -127,7 +127,7 @@ mixin RequestResponseBody(request, collapse, showBlank)
                           br
                 div(style="height: 1px;")
             if request.body
-                h5 Тело запроса
+                h5 Тело сообщения
                 pre: code
                     != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
