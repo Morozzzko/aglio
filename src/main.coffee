@@ -430,7 +430,7 @@ decorate = (api, md, slugCache, verbose) ->
                           JSON.stringify dataStructure.content[0], null, 2)
                         console.log(err)
 
-              if item.content and not process.env.DRAFTER_EXAMPLES
+              if not item.body and item.content
                 for dataStructure in item.content
                   if dataStructure.element is 'dataStructure'
                     try
