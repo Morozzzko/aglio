@@ -57,11 +57,7 @@ mixin Nav()
                               a(href=action.elementLink)
                                   +Badge(action.method)
                                   != action.name || resource.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
-        //- Link to the API hostname, e.g. api.yourcompany.com
-        each meta in self.api.metadata || {}
-            if meta.name == 'HOST'
-                p(style="text-align: center; word-wrap: break-word;")
-                    a(href=meta.value)= meta.value
+
 
 mixin Parameters(params)
     //- Draw a definition list of parameter names, types, defaults,
@@ -196,9 +192,6 @@ mixin ContentTriple()
         header
             h1#top!= self.api.name || 'API Documentation'
 
-    .right
-        h5 API Endpoint
-        a(href=self.api.host)= self.api.host
     .middle
         if self.api.descriptionHtml
             != self.api.descriptionHtml
