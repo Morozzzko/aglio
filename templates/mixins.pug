@@ -210,8 +210,9 @@ mixin ContentTriple()
                 .resource(id=resource.elementId)
                     h3.resource-heading
                         a.permalink(href=resource.elementLink)
-                            != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'                    if resource.description
-                        != self.markdown(resource.description)
+                            != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
+                        if resource.description
+                            != self.markdown(resource.description)
 
             each action in resource.actions || []
                 if action.examples
