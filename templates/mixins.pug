@@ -48,7 +48,7 @@ mixin Nav()
                       li
                           if !self.condenseNav || (resource.actions.length != 1)
                               a(href=resource.elementLink)!= resource.name || 'Resource'
-                              ul: each action in resource.actions || []
+                              each action in resource.actions || []
                                   li: a(href=action.elementLink)
                                     +Badge(action.method)
                                     != action.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
@@ -64,21 +64,17 @@ mixin Parameters(params)
     //- examples and descriptions.
     .title
         strong Параметры URI
-        .collapse-button.show
-            span.close Скрыть
-            span.open Показать
-    .collapse-content
-        dl.inner: each param in params || []
-            dt= self.urldec(param.name)
-            dd
-                code= param.type || 'string'
-                != self.markdown(param.description)
-                if param.values.length
-                    p.choices
-                        strong Возможные значения:&nbsp;
-                        each value in param.values
-                            code= self.urldec(value.value)
-                            = ' '
+    dl.inner: each param in params || []
+        dt= self.urldec(param.name)
+        dd
+            code= param.type || 'string'
+            != self.markdown(param.description)
+            if param.values.length
+                p.choices
+                    strong Возможные значения:&nbsp;
+                    each value in param.values
+                        code= self.urldec(value.value)
+                        = ' '
 
 mixin RequestResponse(title, request, collapse)
     .title
@@ -146,16 +142,17 @@ mixin Content()
     each resourceGroup in self.api.resourceGroups || []
         section.resource-group(id=resourceGroup.elementId)
             h2.group-heading
-                a.permalink(href=resourceGroup.elementLink)
+                a(href=resourceGroup.elementLink)
                     != resourceGroup.name || 'Resource Group'
             if resourceGroup.descriptionHtml
                 != resourceGroup.descriptionHtml
 
             each resource in resourceGroup.resources || []
                 .resource(id=resource.elementId)
-                    h3.resource-heading
-                        a.permalink(href=resource.elementLink)
-                            != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
+                    //- We decided that we don't need resource headings
+                    //- h3.resource-heading
+                    //-     a(href=resource.elementLink)
+                    //-         != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
                     if resource.description
                         != self.markdown(resource.description)
 
@@ -209,8 +206,9 @@ mixin ContentTriple()
             .middle
                 .resource(id=resource.elementId)
                     h3.resource-heading
-                        a.permalink(href=resource.elementLink)
-                            != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
+                        //- We don't need resource headings, those look hideous
+                        //- a.permalink(href=resource.elementLink)
+                        //-     != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
                         if resource.description
                             != self.markdown(resource.description)
 
