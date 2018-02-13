@@ -196,7 +196,7 @@ mixin ContentTriple()
     each resourceGroup in self.api.resourceGroups || []
         .middle
             section.resource-group(id=resourceGroup.elementId)
-                h2.group-heading
+                h2
                     a.permalink(href=resourceGroup.elementLink)
                         != resourceGroup.name || 'Resource Group'
                 if resourceGroup.descriptionHtml
