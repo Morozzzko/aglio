@@ -226,9 +226,10 @@ mixin ContentTriple()
                                   span Запрос
                                   - var requestCount = 0
                                   each example in action.examples
-                                      each request in example.requests
-                                          - requestCount++
-                                          span.tab-button= request.name || 'example ' + requestCount
+                                      if example.requests.length > 1
+                                          each request in example.requests
+                                              - requestCount++
+                                              span.tab-button= request.name || 'example ' + requestCount
                               each example in action.examples
                                   each request in example.requests
                                       .tab
