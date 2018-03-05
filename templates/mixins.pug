@@ -196,8 +196,8 @@ mixin ContentTriple()
         .middle
             section.resource-group(id=resourceGroup.elementId)
                 h2
-                    a.permalink(href=resourceGroup.elementLink)
-                        != resourceGroup.name || 'Resource Group'
+                    //- a.permalink(href=resourceGroup.elementLink)
+                    //-     != resourceGroup.name || 'Resource Group'
                 if resourceGroup.descriptionHtml
                     != resourceGroup.descriptionHtml
 

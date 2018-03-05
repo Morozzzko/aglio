@@ -58,7 +58,13 @@ h2 {
 }
 
 h3 {
-  font-size: 100%;
+  font: @title-font;
+  font-size: 24px;
+}
+
+h4 {
+  font: @title-font;
+  font-size: 20px;
 }
 
 h5 {
@@ -169,7 +175,7 @@ table {
 
   th,
   td {
-    padding: @padding/2 @padding;
+    padding: @padding / 2 @padding;
     border: 1px solid @table-border-color;
   }
 }
@@ -184,17 +190,6 @@ table {
   margin: 1em 0;
   border-radius: 2px;
   font-size: 90%;
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: @title-font;
-    font-size: 135%;
-    font-weight: 500;
-  }
 
   p {
     margin: 0.5em 0;

@@ -510,13 +510,13 @@ exports.render = (input, options, done) ->
     linkify: true
     typographer: true
     highlight: highlight
-  ).use(require('markdown-it-anchor'),
-    slugify: (value) ->
-      output = "header-#{slug(slugCache, value, true)}"
-      slugCache._nav.push [value, "##{output}"]
-      return output
-    permalink: true
-    permalinkClass: 'permalink'
+  # ).use(require('markdown-it-anchor'),
+  #   slugify: (value) ->
+  #     output = "header-#{slug(slugCache, value, true)}"
+  #     slugCache._nav.push [value, "##{output}"]
+  #     return output
+  #   # permalink: true
+  #   # permalinkClass: 'permalink'
   ).use(require('markdown-it-checkbox')
   ).use(require('markdown-it-container'), 'note'
   ).use(require('markdown-it-container'), 'warning')
