@@ -339,8 +339,8 @@ decorate = (api, md, slugCache, verbose) ->
 
   findListsAndRender = (content) ->
     finalHtml = ''
-    for section in content.split '# STARTLIST'
-      for section2 in section.split '# ENDLIST'
+    for section in content.split '<!-- STARTLIST -->'
+      for section2 in section.split '<!-- ENDLIST -->'
         finalHtml += md.render section2
         slugCache._nav.push ['ENDLIST']
       slugCache._nav.pop()
