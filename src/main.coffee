@@ -337,9 +337,33 @@ decorate = (api, md, slugCache, verbose) ->
   if verbose
     console.log "Known data structures: #{Object.keys(dataStructures)}"
 
-  # API overview description
+  findListsAndRender = (content) ->
+    finalHtml = ''
+    for section in content.split '# STARTLIST'
+      for section2 in section.split '# ENDLIST'
+        finalHtml += md.render section2
+        slugCache._nav.push ['ENDLIST']
+      slugCache._nav.pop()
+      slugCache._nav.push ['STARTLIST']
+    slugCache._nav.pop()
+    finalHtml
+
+  # API overview description”
   if api.description
-    api.descriptionHtml = md.render api.description
+    content_sections = api.description.split '<!-- LHSCONTENT -->'
+    api.descriptionHtml = []
+    slugCache._nav = []
+
+    api.descriptionHtml.push([findListsAndRender content_sections[0]])
+
+    for section in content_sections.slice 1
+      do ->
+        sides = section.split '<!-- RHSCONTENT -->'
+        [sides[1], rest] = sides[1].split '<!-- ENDCONTENT -->'
+        sidesContent = (findListsAndRender(side) for side in sides)
+        api.descriptionHtml.push sidesContent
+        api.descriptionHtml.push [findListsAndRender rest]
+
     api.navItems = slugCache._nav
     slugCache._nav = []
 
@@ -510,13 +534,13 @@ exports.render = (input, options, done) ->
     linkify: true
     typographer: true
     highlight: highlight
-  # ).use(require('markdown-it-anchor'),
-  #   slugify: (value) ->
-  #     output = "header-#{slug(slugCache, value, true)}"
-  #     slugCache._nav.push [value, "##{output}"]
-  #     return output
-  #   # permalink: true
-  #   # permalinkClass: 'permalink'
+   ).use(require('markdown-it-anchor'),
+     slugify: (value) ->
+       output = "header-#{slug(slugCache, value, true)}"
+       slugCache._nav.push [value, "##{output}"]
+       return output
+     permalink: true
+     permalinkClass: 'permalink'
   ).use(require('markdown-it-checkbox')
   ).use(require('markdown-it-container'), 'note'
   ).use(require('markdown-it-container'), 'warning')

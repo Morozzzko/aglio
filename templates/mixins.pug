@@ -133,8 +133,8 @@ mixin Content()
     header
         h1#top!= self.api.name || 'API Documentation'
 
-    if self.api.descriptionHtml
-        != self.api.descriptionHtml
+    //- if self.api.descriptionHtml
+    //-    != self.api.descriptionHtml
 
     //- Loop through and display information about all the resource
     //- groups, resources, and actions.
@@ -187,9 +187,12 @@ mixin ContentTriple()
             h1#top!= self.api.name || 'API Documentation'
 
     .middle
-        if self.api.descriptionHtml
-            != self.api.descriptionHtml
-
+        if self.api.descriptionHtml && self.api.descriptionHtml.length
+            != self.api.descriptionHtml[0][0]
+    if self.api.descriptionHtml && self.api.descriptionHtml.length > 1
+      each content_section in self.api.descriptionHtml.slice(1)
+        .right!= content_section[1]
+        .middle!= content_section[0]
     //- Loop through and display information about all the resource
     //- groups, resources, and actions.
     each resourceGroup in self.api.resourceGroups || []

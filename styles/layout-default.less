@@ -3,6 +3,7 @@ body {
   color: @text-color;
   background: @background-color;
   font: @base-font;
+  margin: @page-margin;
 }
 
 header {
@@ -613,9 +614,9 @@ nav {
 
 #right-panel-background {
   position: absolute;
-  right: 0;
-  top: -@padding;
-  bottom: -@padding;
+  right: -@page-margin;
+  top: -@page-margin;
+  bottom: -@page-margin;
   width: @right-panel-background-width;
   background-color: @right-background-color;
   z-index: -1;
