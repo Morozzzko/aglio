@@ -37,8 +37,6 @@ mixin Nav()
         each resourceGroup in self.api.resourceGroups || []
             .resource-group
                 .heading
-                  .chevron
-                    i.open.fa.fa-angle-down
                   a()!= resourceGroup.name || 'Resource Group'
                 .collapse-content
                   ul
@@ -46,7 +44,6 @@ mixin Nav()
                       li
                         a(href=item[1])!= item[0]
                     each resource in resourceGroup.resources || []
-                      li
                           if !self.condenseNav || (resource.actions.length != 1)
                               each action in resource.actions || []
                                   li: a(href=action.elementLink)
