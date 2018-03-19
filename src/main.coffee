@@ -30,6 +30,11 @@ errMsg = (message, err) ->
 sha1 = (value) ->
   crypto.createHash('sha1').update(value.toString()).digest('hex')
 
+readLocales = (root, language) ->
+  dest_path = path.join(root, language + '.json')
+  lang_file = fs.readFileSync(dest_path)
+  JSON.parse(lang_file)
+
 # A function to create ID-safe slugs. If `unique` is passed, then
 # unique slugs are returned for the same input. The cache is just
 # a plain object where the keys are the sluggified name.
@@ -498,7 +503,10 @@ exports.getConfig = ->
     {name: 'style',
     description: 'Layout style name or path to custom stylesheet'},
     {name: 'emoji', description: 'Enable support for emoticons',
-    boolean: true, default: true}
+    boolean: true, default: true},
+
+    {name: 'lang', description: 'Language code'},
+    {name: 'lang-dir', description: 'Language directory'}
   ]
 
 # Render the blueprint with the given options using pug and LESS
@@ -520,6 +528,8 @@ exports.render = (input, options, done) ->
   options.themeTemplate ?= 'default'
   options.themeCondenseNav ?= true
   options.themeFullWidth ?= false
+  options.themeLang ?= null
+  options.themeLangDir ?= null
 
   # Transform built-in layout names to paths
   if options.themeTemplate is 'default'
@@ -547,6 +557,11 @@ exports.render = (input, options, done) ->
 
   if options.themeEmoji then md.use require('markdown-it-emoji')
 
+  if options.themeLang and options.themeLangDir
+    locale = readLocales(options.themeLangDir, options.themeLang)
+  else
+    locale = {}
+
   # Enable code highlighting for unfenced code blocks
   md.renderer.rules.code_block = md.renderer.rules.fence
 
@@ -572,6 +587,7 @@ exports.render = (input, options, done) ->
       markdown: (content) -> md.render content
       slug: slug.bind(slug, slugCache)
       urldec: (value) -> querystring.unescape(value)
+      locale: locale
 
     for key, value of options.locals or {}
       locals[key] = value

@@ -28,7 +28,8 @@ mixin Nav()
                 .heading
                   .chevron
                     i.open.fa.fa-angle-down
-                  a(href='#top') Навигация
+                  a(href='#top')
+                    != self.locale.navigation
                 .collapse-content
                   ul: each item in self.api.navItems
                     li
@@ -62,7 +63,8 @@ mixin Parameters(params)
     //- Draw a definition list of parameter names, types, defaults,
     //- examples and descriptions.
     .title
-        strong Параметры URI
+        strong
+            != self.locale.uriParameters
     dl.inner: each param in params || []
         dt= self.urldec(param.name)
         dd
@@ -70,7 +72,8 @@ mixin Parameters(params)
             != self.markdown(param.description)
             if param.values.length
                 p.choices
-                    strong Возможные значения:&nbsp;
+                    strong
+                        != self.locale.possibleValues
                     each value in param.values
                         code= self.urldec(value.value)
                         = ' '
@@ -84,8 +87,10 @@ mixin RequestResponse(title, request, collapse)
                 code= request.name
         if collapse && request.hasContent
             .collapse-button
-                span.close Скрыть
-                span.open Показать
+                span.close
+                    != self.locale.collapse.close
+                span.open
+                    != self.locale.collapse.open
     +RequestResponseBody(request, collapse)
 
 mixin RequestResponseBody(request, collapse, showBlank)
@@ -95,7 +100,8 @@ mixin RequestResponseBody(request, collapse, showBlank)
                 .description!= self.markdown(request.description)
 
             if Object.keys(request.headers).length
-                h5 Заголовки
+                h5
+                    != self.locale.headers
                 pre: code
                     each item, index in request.headers
                         != self.highlight(item.name + ': ' + item.value, 'http')
@@ -103,16 +109,20 @@ mixin RequestResponseBody(request, collapse, showBlank)
                           br
                 div(style="height: 1px;")
             if request.body
-                h5 Тело сообщения
+                h5
+                    != self.locale.body
                 pre: code
                     != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
             if request.schema
                 div
-                    h5(style='display: inline;') Схема
+                    h5(style='display: inline;')
+                        != self.locale.schema
                     .collapse-button
-                        span.close Скрыть
-                        span.open Показать
+                        span.close
+                            != self.locale.collapse.close
+                        span.open
+                            != self.locale.collapse.open
                 .collapse-content
                     pre: code
                         != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
@@ -165,7 +175,8 @@ mixin Content()
                             if action.description
                                 != self.markdown(action.description)
 
-                            h4 Пример URI
+                            h4
+                                != self.locale.uriExample
                             .definition
                                 span.method(class=action.methodLower)= action.method
                                 | &nbsp;
@@ -226,7 +237,8 @@ mixin ContentTriple()
                       .tabs
                           if action.hasRequest
                               .example-names
-                                  span Запрос
+                                  span
+                                    != self.locale.request
                                   - var requestCount = 0
                                   each example in action.examples
                                       if example.requests.length > 1
@@ -239,7 +251,8 @@ mixin ContentTriple()
                                           +RequestResponseBody(request, false, true)
                                           .tabs
                                               .example-names
-                                                  span Ответ
+                                                  span
+                                                    != self.locale.response
                                                   each response in example.responses
                                                       span.tab-button= response.name
                                               each response in example.responses
@@ -249,7 +262,8 @@ mixin ContentTriple()
                             each example in action.examples
                                 .tabs
                                     .example-names
-                                        span Ответ
+                                        span
+                                            != self.locale.response
                                         each response in example.responses
                                             span.tab-button= response.name
                                     each response in example.responses
