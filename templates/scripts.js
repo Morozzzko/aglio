@@ -220,8 +220,27 @@ function init() {
 // Initial call to set up buttons
 init();
 
+function removeAnchors() {
+  var anchors = document.querySelectorAll("[id^=header] .permalink");
+  anchors.forEach(function(anchor) {
+    var parent = anchor.parentNode;
+    var text = parent.textContent.replace(" ¶", "");
+    var newAnchor = document.createElement("a");
+    newAnchor.href = anchor.href;
+    newAnchor.textContent = text;
+
+    // remove children
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
+    }
+
+    parent.appendChild(newAnchor);
+  });
+}
+
 window.onload = function() {
   // autoCollapse();
   // Remove the `preload` class to enable animations
+  removeAnchors();
   document.querySelector("body").className = "";
 };

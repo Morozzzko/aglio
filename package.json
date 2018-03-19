@@ -1,12 +1,13 @@
 {
   "name": "aglio-theme-planado",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Custom theme for the Aglio API Blueprint renderer",
   "main": "lib/main.js",
   "scripts": {
     "build": "coffeelint src/*.coffee && coffee -o lib -c src",
     "precoverage": "npm run build",
-    "coverage": "istanbul cover -x cache/*.js _mocha -- --compilers coffee:coffeescript/register -R spec",
+    "coverage":
+      "istanbul cover -x cache/*.js _mocha -- --compilers coffee:coffeescript/register -R spec",
     "precoveralls": "npm run coverage",
     "coveralls": "coveralls <coverage/lcov.info",
     "pretest": "npm run build",
