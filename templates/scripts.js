@@ -210,7 +210,7 @@ function init() {
   // Make nav items clickable to collapse/expand their content.
   var navItems = document.querySelectorAll("nav .resource-group .heading");
   for (i = 0; i < navItems.length; i++) {
-    navItems[i].onclick = toggleCollapseNav;
+    //   navItems[i].onclick = toggleCollapseNav;
 
     // Show all by default
     toggleCollapseNav({ target: navItems[i].children[0] });

@@ -322,6 +322,14 @@ modifyUriTemplate = (templateUri, parameters, colorize) ->
     uri
   , []).join('').replace(/\/+/g, '/')
 
+prepareNav = (navigation) ->
+  navigation.map(
+    ([tag, title, id, children]) ->
+      link: "#" + id[1],
+      title: title,
+      children: prepareNav(children)
+  )
+
 decorate = (api, md, slugCache, verbose) ->
   # Decorate an API Blueprint AST with various pieces of information that
   # will be useful for the theme. Anything that would significantly
@@ -342,34 +350,22 @@ decorate = (api, md, slugCache, verbose) ->
   if verbose
     console.log "Known data structures: #{Object.keys(dataStructures)}"
 
-  findListsAndRender = (content) ->
-    finalHtml = ''
-    for section in content.split '<!-- STARTLIST -->'
-      for section2 in section.split '<!-- ENDLIST -->'
-        finalHtml += md.render section2
-        slugCache._nav.push ['ENDLIST']
-      slugCache._nav.pop()
-      slugCache._nav.push ['STARTLIST']
-    slugCache._nav.pop()
-    finalHtml
-
   # API overview description”
   if api.description
     content_sections = api.description.split '<!-- LHSCONTENT -->'
     api.descriptionHtml = []
-    slugCache._nav = []
 
-    api.descriptionHtml.push([findListsAndRender content_sections[0]])
+    api.descriptionHtml.push([md.render content_sections[0]])
 
     for section in content_sections.slice 1
       do ->
         sides = section.split '<!-- RHSCONTENT -->'
         [sides[1], rest] = sides[1].split '<!-- ENDCONTENT -->'
-        sidesContent = (findListsAndRender(side) for side in sides)
+        sidesContent = (md.render(side) for side in sides)
         api.descriptionHtml.push sidesContent
-        api.descriptionHtml.push [findListsAndRender rest]
+        api.descriptionHtml.push [md.render rest]
 
-    api.navItems = slugCache._nav
+    api.navItems = prepareNav(slugCache._nav)
     slugCache._nav = []
 
   for meta in api.metadata or []
@@ -535,6 +531,63 @@ exports.render = (input, options, done) ->
   if options.themeTemplate is 'default'
     options.themeTemplate = path.join ROOT, 'templates', 'index.pug'
 
+  collectNavigationData = (md, opts) ->
+    # How it works:
+    # 1. We attach the function *after* all H-tags are processed
+    # 2. Those tags have `id` as an attribute
+    # 3. We build a nested list of items (pretty lispy)
+    # 4. We convert the list into a dict-like structure and render it
+    noop = () -> []
+    setupCallback = if opts && opts.callback then opts.callback else noop
+    originalHeadingOpen = md.renderer.rules.heading_open
+    navigation = []
+
+    setupCallback(navigation)
+
+    getHeadingLevel = (heading) ->
+      parseInt(heading[1]) # 'h1' -> 1, etc.
+
+
+    recursivelyAdd = (navigation, item) ->
+      [..., parent] = navigation
+
+      if parent and parent.length > 0
+        [parent_tag, parent_title, parent_id, parent_children] = parent
+        [item_tag, ...] = item
+
+        parent_level = getHeadingLevel(parent_tag)
+        item_level = getHeadingLevel(item_tag)
+
+        if parent_level < item_level # higher level = child
+          recursivelyAdd(parent_children, item)
+        else
+          navigation.push(item)
+      else
+        navigation.push(item)
+
+    md.renderer.rules.heading_open = (
+      tokens,
+      idx,
+      something,
+      somethingelse,
+      self
+    ) ->
+      title = tokens[idx + 1].children.reduce((acc, t) ->
+        acc + t.content
+      , "").replace(" ¶", "")
+
+      tag = tokens[idx].tag
+      id = tokens[idx].attrs.find(([key, _]) -> key == "id")
+
+      item = [tag, title, id, []]
+
+      recursivelyAdd(navigation, item)
+
+      if (originalHeadingOpen)
+        originalHeadingOpen.apply(this, arguments)
+      else
+        self.renderToken.apply(self, arguments)
+
   # Setup markdown with code highlighting and smartypants. This also enables
   # automatically inserting permalinks for headers.
   slugCache =
@@ -544,13 +597,16 @@ exports.render = (input, options, done) ->
     linkify: true
     typographer: true
     highlight: highlight
-   ).use(require('markdown-it-anchor'),
+  ).use(require('markdown-it-anchor'),
      slugify: (value) ->
        output = "header-#{slug(slugCache, value, true)}"
-       slugCache._nav.push [value, "##{output}"]
        return output
      permalink: true
      permalinkClass: 'permalink'
+  ).use(
+    collectNavigationData,
+      callback: (navigation) ->
+        slugCache._nav = navigation
   ).use(require('markdown-it-checkbox')
   ).use(require('markdown-it-container'), 'note'
   ).use(require('markdown-it-container'), 'warning')
