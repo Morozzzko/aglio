@@ -41,23 +41,26 @@ mixin Nav()
         each resourceGroup in self.api.resourceGroups || []
             .resource-group
                 .heading
-                  a()!= resourceGroup.name || 'Resource Group'
-                .collapse-content
-                  ul
-                    each item in resourceGroup.navItems || []
-                      li
-                        a(href=item[1])!= item[0]
-                    each resource in resourceGroup.resources || []
-                          if !self.condenseNav || (resource.actions.length != 1)
-                              each action in resource.actions || []
-                                  li: a(href=action.elementLink)
+                    a()!= resourceGroup.name || 'Resource Group'
+                .nav-content-container
+                    - resourceItems = (resourceGroup.resources || []).map(x => (x.actions || []).length).reduce((x, y) => x + y, 0)
+                    - totalItems = (resourceGroup.navItems || []).length + resourceItems
+                    - className = (totalItems > 2) ? '' : 'no-wrong-margin'
+                    ul(class=className)
+                        each item in resourceGroup.navItems || []
+                            li
+                                a(href=item[1])!= item[0]
+                        each resource in resourceGroup.resources || []
+                            if !self.condenseNav || (resource.actions.length != 1)
+                                each action in resource.actions || []
+                                    li: a(href=action.elementLink)
+                                        +Badge(action.method)
+                                        != action.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
+                            else
+                                - var action = resource.actions[0]
+                                a(href=action.elementLink)
                                     +Badge(action.method)
-                                    != action.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
-                          else
-                              - var action = resource.actions[0]
-                              a(href=action.elementLink)
-                                  +Badge(action.method)
-                                  != action.name || resource.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
+                                    != action.name || resource.name || action.method + ' ' + (action.attributes && action.attributes.uriTemplate || resource.uriTemplate)
 
 
 mixin Parameters(params)
