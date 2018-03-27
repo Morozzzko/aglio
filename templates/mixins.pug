@@ -110,7 +110,7 @@ mixin RequestResponseBody(request, collapse, showBlank)
                     each item, index in request.headers
                         != self.highlight(item.name + ': ' + item.value, 'http')
                         if index < request.headers.length - 1
-                          br
+                            br
                 div(style="height: 1px;")
             if request.body
                 h5
@@ -185,8 +185,8 @@ mixin Content()
                                 span.method(class=action.methodLower)= action.method
                                 | &nbsp;
                                 span.uri
-                                  span.hostname= self.api.host
-                                  != action.colorizedUriTemplate
+                                    span.hostname= self.api.host
+                                    != action.colorizedUriTemplate
 
                             //- A list of sub-sections for parameters, requests
                             //- and responses.
@@ -205,9 +205,9 @@ mixin ContentTriple()
         if self.api.descriptionHtml && self.api.descriptionHtml.length
             != self.api.descriptionHtml[0][0]
     if self.api.descriptionHtml && self.api.descriptionHtml.length > 1
-      each content_section in self.api.descriptionHtml.slice(1)
-        .right!= content_section[1]
-        .middle!= content_section[0]
+        each content_section in self.api.descriptionHtml.slice(1)
+            .right!= content_section[1]
+            .middle!= content_section[0]
     //- Loop through and display information about all the resource
     //- groups, resources, and actions.
     each resourceGroup in self.api.resourceGroups || []
@@ -232,47 +232,47 @@ mixin ContentTriple()
             each action in resource.actions || []
                 if action.examples
                     .right
-                      .definition
-                          span.method(class=action.methodLower)= action.method
-                          | &nbsp;
-                          span.uri
-                            span.hostname= self.api.host
-                            != action.colorizedUriTemplate
-                      .tabs
-                          if action.hasRequest
-                              .example-names
-                                  span
-                                    != self.locale.request
-                                  - var requestCount = 0
-                                  each example in action.examples
-                                      if example.requests.length > 1
-                                          each request in example.requests
-                                              - requestCount++
-                                              span.tab-button= request.name || 'example ' + requestCount
-                              each example in action.examples
-                                  each request in example.requests
-                                      .tab
-                                          +RequestResponseBody(request, false, true)
-                                          .tabs
-                                              .example-names
-                                                  span
-                                                    != self.locale.response
-                                                  each response in example.responses
-                                                      span.tab-button= response.name
-                                              each response in example.responses
-                                                  .tab
-                                                      +RequestResponseBody(response, false, true)
-                          else
-                            each example in action.examples
-                                .tabs
-                                    .example-names
-                                        span
-                                            != self.locale.response
-                                        each response in example.responses
-                                            span.tab-button= response.name
-                                    each response in example.responses
+                        .definition
+                            span.method(class=action.methodLower)= action.method
+                            | &nbsp;
+                            span.uri
+                                span.hostname= self.api.host
+                                != action.colorizedUriTemplate
+                        .tabs
+                            if action.hasRequest
+                                .example-names
+                                    span
+                                        != self.locale.request
+                                    - var requestCount = 0
+                                    each example in action.examples
+                                        if example.requests.length > 1
+                                            each request in example.requests
+                                                - requestCount++
+                                                span.tab-button= request.name || 'example ' + requestCount
+                                each example in action.examples
+                                    each request in example.requests
                                         .tab
-                                            +RequestResponseBody(response, false, true)
+                                            +RequestResponseBody(request, false, true)
+                                            .tabs
+                                                .example-names
+                                                    span
+                                                        != self.locale.response
+                                                    each response in example.responses
+                                                        span.tab-button= response.name
+                                                each response in example.responses
+                                                    .tab
+                                                        +RequestResponseBody(response, false, true)
+                            else
+                                each example in action.examples
+                                    .tabs
+                                        .example-names
+                                            span
+                                                != self.locale.response
+                                            each response in example.responses
+                                                span.tab-button= response.name
+                                        each response in example.responses
+                                            .tab
+                                                +RequestResponseBody(response, false, true)
                 .middle
                     .action(class=action.methodLower, id=action.elementId)
                         h4.action-heading
